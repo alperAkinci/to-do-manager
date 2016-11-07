@@ -11,8 +11,11 @@ import UIKit
 class ListItemCell: UITableViewCell {
     
     @IBOutlet weak var categoryName: UILabel!
-    @IBOutlet weak var taskName: UILabel!
+    @IBOutlet weak var title: UILabel!
     @IBOutlet weak var completionDate: UILabel!
+    @IBOutlet weak var editTaskButton: UIButton!
+    
+    
     @IBAction func editTask(sender: UIButton) {
     
     }

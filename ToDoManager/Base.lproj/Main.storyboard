@@ -6,7 +6,7 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--Task List View Controller-->
+        <!--Task List-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="TaskListViewController" customModule="ToDoManager" customModuleProvider="target" sceneMemberID="viewController">
@@ -41,6 +41,7 @@
                                                     </variation>
                                                     <connections>
                                                         <action selector="editTask:" destination="RaP-gI-WMg" eventType="touchUpInside" id="LF0-Ri-vSJ"/>
+                                                        <segue destination="sXF-Et-uMi" kind="presentation" identifier="EditTask" id="aPT-d5-PaK"/>
                                                     </connections>
                                                 </button>
                                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="SCF-qz-Zik">
@@ -119,7 +120,8 @@
                                         <connections>
                                             <outlet property="categoryName" destination="fO3-9G-s3w" id="DPQ-Kg-aNy"/>
                                             <outlet property="completionDate" destination="QH2-a1-rsN" id="JFW-5W-24A"/>
-                                            <outlet property="taskName" destination="xur-TZ-fqP" id="LsM-lX-s0N"/>
+                                            <outlet property="editTaskButton" destination="baW-ij-anO" id="iQJ-T1-zSp"/>
+                                            <outlet property="title" destination="xur-TZ-fqP" id="OHh-4c-5fr"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -137,14 +139,114 @@
                             <constraint firstItem="2Mt-Tv-cpd" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" id="u0G-0b-Xze"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="oKg-bG-ZpI">
+                    <navigationItem key="navigationItem" title="Task List" id="oKg-bG-ZpI">
                         <barButtonItem key="leftBarButtonItem" image="nav_bar_ic_settings" id="ddd-fm-BPs"/>
-                        <barButtonItem key="rightBarButtonItem" image="nav_bar_ic_add" id="Kuw-co-Rwk"/>
+                        <barButtonItem key="rightBarButtonItem" image="nav_bar_ic_add" id="Kuw-co-Rwk">
+                            <connections>
+                                <segue destination="sXF-Et-uMi" kind="presentation" identifier="AddNewTask" id="zG9-ia-CUv"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="tableView" destination="2Mt-Tv-cpd" id="oj1-cT-lbh"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1141" y="263"/>
+        </scene>
+        <!--Add New Task-->
+        <scene sceneID="cbo-qC-RhM">
+            <objects>
+                <tableViewController id="JXL-aQ-1zF" customClass="TaskDetailViewController" customModule="ToDoManager" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="HLQ-bi-ULU">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <sections>
+                            <tableViewSection headerTitle="Task Name" id="5Du-MB-Nhw">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="xFS-3r-wga">
+                                        <rect key="frame" x="0.0" y="114" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="xFS-3r-wga" id="DkV-H9-V8L">
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Jy8-u9-yjx">
+                                                    <rect key="frame" x="8" y="8" width="584" height="27"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="no" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
+                                                    <connections>
+                                                        <outlet property="delegate" destination="JXL-aQ-1zF" id="qKr-mn-Snd"/>
+                                                    </connections>
+                                                </textField>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="bottomMargin" secondItem="Jy8-u9-yjx" secondAttribute="bottom" id="Arn-7F-DtF"/>
+                                                <constraint firstItem="Jy8-u9-yjx" firstAttribute="top" secondItem="DkV-H9-V8L" secondAttribute="topMargin" id="Fyr-ax-Q5Q"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="Jy8-u9-yjx" secondAttribute="trailing" id="Xsl-7c-7DD"/>
+                                                <constraint firstAttribute="leadingMargin" secondItem="Jy8-u9-yjx" secondAttribute="leading" id="qGM-27-pAJ"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
+                            <tableViewSection id="Z9V-XD-B0T">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" accessoryType="disclosureIndicator" indentationWidth="10" textLabel="152-Wz-ZGg" detailTextLabel="100-Et-die" style="IBUITableViewCellStyleValue1" id="01M-d3-ouu">
+                                        <rect key="frame" x="0.0" y="194" width="600" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="01M-d3-ouu" id="RQX-Lg-OSb">
+                                            <rect key="frame" x="0.0" y="0.0" width="567" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Category" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="152-Wz-ZGg">
+                                                    <rect key="frame" x="15" y="12" width="67" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="100-Et-die">
+                                                    <rect key="frame" x="523" y="12" width="42" height="20"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                    <color key="textColor" red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
+                        </sections>
+                        <connections>
+                            <outlet property="dataSource" destination="JXL-aQ-1zF" id="0Lg-Lx-dCt"/>
+                            <outlet property="delegate" destination="JXL-aQ-1zF" id="0Cq-iS-nva"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Add New Task" id="d8e-dV-Lsy">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="nxF-Ud-bSb">
+                            <connections>
+                                <action selector="cancel:" destination="JXL-aQ-1zF" id="QBS-FN-dV7"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" systemItem="done" id="2lN-kH-ggs">
+                            <connections>
+                                <action selector="done:" destination="JXL-aQ-1zF" id="CHi-Zl-BBS"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="categoryNameLabel" destination="100-Et-die" id="qqE-z9-I2n"/>
+                        <outlet property="doneBarButton" destination="2lN-kH-ggs" id="Y9J-qe-Dmq"/>
+                        <outlet property="titleTextField" destination="Jy8-u9-yjx" id="gnW-Sa-5yK"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LWp-yu-A0n" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2726" y="263"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="NGc-NL-Y8k">
@@ -164,9 +266,30 @@
             </objects>
             <point key="canvasLocation" x="329" y="263"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="1tE-YQ-qaO">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="sXF-Et-uMi" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="wEb-Sa-8eQ">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="JXL-aQ-1zF" kind="relationship" relationship="rootViewController" id="AsP-To-nuU"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ru9-aE-toG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1914" y="263"/>
+        </scene>
     </scenes>
     <resources>
         <image name="nav_bar_ic_add" width="20" height="20"/>
         <image name="nav_bar_ic_settings" width="20" height="20"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="aPT-d5-PaK"/>
+    </inferredMetricsTieBreakers>
 </document>

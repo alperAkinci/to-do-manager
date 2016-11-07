@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 
-class ListItem {
+class ListItem : NSObject {
     
     // Properties
     var title : String = ""
@@ -18,13 +18,13 @@ class ListItem {
     
     var completionDate : NSDate?
     var categoryColor : UIColor?
-    var categoryName : CategoryName?{
+    var categoryName : CategoryName = CategoryName.ToDo{
         didSet{
             
             // set category color after category has set
-            if let category = categoryName {
-                setCategoryColor(category)
-            }
+            setCategoryColor(categoryName)
+            
+        
         }
     }
     
@@ -32,12 +32,11 @@ class ListItem {
     
     //Initializers
     
-    init(){}
+    override init(){}
     
-    init(title : String , isCompleted : Bool){
+    init(title : String){
         
         self.title = title
-        self.isCompleted = isCompleted
     
     }
     

@@ -8,8 +8,9 @@
 
 import UIKit
 
-class TaskListViewController: UIViewController ,UITableViewDataSource,UITableViewDelegate{
+class TaskListViewController: UIViewController ,UITableViewDataSource,UITableViewDelegate , TaskDetailViewControllerDelegate{
     
+    @IBOutlet weak var tableView: UITableView!
     var uncompletedTasks = [ListItem]()
     var completedTasks = [ListItem]()
     var taskList = [[ListItem]]()
@@ -17,8 +18,9 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     //MARK: View Controller Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         taskList = [uncompletedTasks,completedTasks]
-        self.title = "Task List"
+        
         
         let row0item = ListItem()
         row0item.title = "A new MacBook"
@@ -45,6 +47,8 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         addList(row2item)
         
     }
+
+    
     
     //MARK: UITableViewDelegate , UITableViewDataSource Methods
 
@@ -74,7 +78,6 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         configureCompletionMarkForCell(cell, withListItem: item)
         configureTextForCell(cell, withListItem: item)
-        
         return cell
     }
     
@@ -101,6 +104,76 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         return sectionName
     }
     
+    func tableView(tableView: UITableView,commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        // remove from taskList data
+        taskList[indexPath.section].removeAtIndex(indexPath.row)
+        
+        //remove the row from tableView
+        let indexPaths = [indexPath]
+        tableView.deleteRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
+    }
+    
+    
+    // MARK: Prepare For Seque
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "AddNewTask" {
+            
+            let navigationController = segue.destinationViewController
+                as! UINavigationController
+            
+            let controller = navigationController.topViewController
+                as! TaskDetailViewController
+            
+            controller.delegate = self
+        
+        }else if segue.identifier == "EditTask"{
+            
+            let navigationController = segue.destinationViewController
+                as! UINavigationController
+            let controller = navigationController.topViewController
+                as! TaskDetailViewController
+            
+            controller.delegate = self
+            
+            //Get the indexPath from button placed in UITableViewCell
+            if let button = sender as? UIButton{
+
+                let rootViewPoint = button.superview!.convertPoint(button.center, toView: self.tableView)
+                
+                if let indexPath = self.tableView.indexPathForRowAtPoint(rootViewPoint){
+                    controller.itemToEdit = taskList[indexPath.section][indexPath.row]
+                }
+            }
+        
+        }
+    }
+    
+    //MARK: Unwind Seque
+    
+    @IBAction func saveTaskDetails(segue:UIStoryboardSegue) {
+        
+        if let taskDetailViewController = segue.sourceViewController as? TaskDetailViewController {
+            
+            let vc = taskDetailViewController
+            let item = ListItem()
+            item.title = vc.titleTextField.text!
+            
+            // Add item to uncompleted array list , section 0
+            let newRowIndex = taskList[0].count
+            taskList[0].append(item)
+            let indexPath = NSIndexPath(forRow: newRowIndex, inSection: 0)
+            let indexPaths = [indexPath]
+            tableView.insertRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
+        }
+        
+        
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    
     //MARK: Convenience Methods
     func addList(item : ListItem){
         (item.isCompleted) ? taskList[1].append(item) : taskList[0].append(item)
@@ -119,8 +192,8 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     func configureTextForCell(cell: ListItemCell,
                               withListItem item: ListItem) {
         
-        cell.taskName.text = item.title
-        cell.categoryName.text = item.categoryName!.toString()
+        cell.title.text = item.title
+        cell.categoryName.text = item.categoryName.toString()
     
     }
     
@@ -134,6 +207,50 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
             taskList[0].append(item)
         }
     }
+    
+    //MARK: TaskDetailViewControllerDelegate
+    
+    func taskDetailViewControllerDidCancel(controller: TaskDetailViewController) {
+        
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    
+    
+    func taskDetailViewController(controller: TaskDetailViewController, didFinishAddingNewTask item: ListItem) {
+        
+        //Add new row to uncompleted section of list , section 0 
+        let newRowIndex = taskList[0].count
+        taskList[0].append(item)
+        let indexPath = NSIndexPath(forRow: newRowIndex, inSection: 0)
+        let indexPaths = [indexPath]
+        tableView.insertRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
+        dismissViewControllerAnimated(true, completion: nil)
+        
+    }
+    
+    func taskDetailViewController(controller: TaskDetailViewController,didFinishEditingNewTask item: ListItem){
+        
+        //Update the row of edited cell
+        var indexPath = NSIndexPath()
+        var section : Int
+        item.isCompleted ? (section = 1) : (section = 0)
+        
+        if let index = taskList[section].indexOf(item) {
+            
+            indexPath = NSIndexPath(forRow: index, inSection: section)
+        }
+        
+        if let cell = tableView.cellForRowAtIndexPath(indexPath) as? ListItemCell {
+            configureTextForCell(cell, withListItem: item)
+        }
+    
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+
+    
+    
+    
     
 }
 
