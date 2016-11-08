@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4E1E8E5F1DD0759E00FE54ED /* CategoryPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E5E1DD0759E00FE54ED /* CategoryPickerViewController.swift */; };
+		4E1E8E611DD1F02900FE54ED /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E601DD1F02900FE54ED /* SettingsViewController.swift */; };
 		4E4BEAC11DCCE4A200B4E4E2 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */; };
 		4E4BEAC91DCE199C00B4E4E2 /* ListItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEAC81DCE199C00B4E4E2 /* ListItemCell.swift */; };
 		4E4BEACF1DCF526C00B4E4E2 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEACE1DCF526C00B4E4E2 /* TaskDetailViewController.swift */; };
@@ -19,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4E1E8E5E1DD0759E00FE54ED /* CategoryPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryPickerViewController.swift; sourceTree = "<group>"; };
+		4E1E8E601DD1F02900FE54ED /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
 		4E4BEAC81DCE199C00B4E4E2 /* ListItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListItemCell.swift; sourceTree = "<group>"; };
 		4E4BEACE1DCF526C00B4E4E2 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -57,6 +61,8 @@
 			children = (
 				4EACD1FB1DCC8A6C003D1E12 /* TaskListViewController.swift */,
 				4E4BEACE1DCF526C00B4E4E2 /* TaskDetailViewController.swift */,
+				4E1E8E5E1DD0759E00FE54ED /* CategoryPickerViewController.swift */,
+				4E1E8E601DD1F02900FE54ED /* SettingsViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -168,7 +174,9 @@
 				4EACD1FA1DCC8A6C003D1E12 /* AppDelegate.swift in Sources */,
 				4EACD2021DCC8A6C003D1E12 /* ToDoManager.xcdatamodeld in Sources */,
 				4E4BEACF1DCF526C00B4E4E2 /* TaskDetailViewController.swift in Sources */,
+				4E1E8E5F1DD0759E00FE54ED /* CategoryPickerViewController.swift in Sources */,
 				4E4BEAC91DCE199C00B4E4E2 /* ListItemCell.swift in Sources */,
+				4E1E8E611DD1F02900FE54ED /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

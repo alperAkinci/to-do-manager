@@ -22,26 +22,22 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         taskList = [uncompletedTasks,completedTasks]
         
         
-        let row0item = ListItem()
-        row0item.title = "A new MacBook"
+        let row0item = ListItem(title:"A new MacBook")
         row0item.isCompleted = false
         row0item.categoryName = CategoryName.ToBuy
         addList(row0item)
         
-        let row3item = ListItem()
-        row3item.title = "Go To SuperMarket"
+        let row3item = ListItem(title:"Go To SuperMarket")
         row3item.isCompleted = false
         row3item.categoryName = CategoryName.ToDo
         addList(row3item)
         
-        let row1item = ListItem()
-        row1item.title = "Prague"
+        let row1item = ListItem(title: "Prague")
         row1item.isCompleted = true
         row1item.categoryName = CategoryName.ToVisit
         addList(row1item)
         
-        let row2item = ListItem()
-        row2item.title = "WWDC 2016"
+        let row2item = ListItem(title: "WWDC 2016")
         row2item.isCompleted = true
         row2item.categoryName = CategoryName.ToRemember
         addList(row2item)
@@ -78,6 +74,8 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         configureCompletionMarkForCell(cell, withListItem: item)
         configureTextForCell(cell, withListItem: item)
+        configureDateForCell(cell, withListItem: item)
+        
         return cell
     }
     
@@ -88,7 +86,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
             let item = taskList[indexPath.section][indexPath.row] as ListItem
             item.toggleCompletionMark()
             
-            configureSectionForCell(indexPath, withListItem: item)
+            configureSectionOfCell(indexPath, withListItem: item)
             configureCompletionMarkForCell(cell, withListItem: item)
         }
         
@@ -153,6 +151,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     
     //MARK: Unwind Seque
     
+    /*
     @IBAction func saveTaskDetails(segue:UIStoryboardSegue) {
         
         if let taskDetailViewController = segue.sourceViewController as? TaskDetailViewController {
@@ -172,6 +171,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         dismissViewControllerAnimated(true, completion: nil)
     }
+    */
     
     
     //MARK: Convenience Methods
@@ -193,11 +193,12 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
                               withListItem item: ListItem) {
         
         cell.title.text = item.title
-        cell.categoryName.text = item.categoryName.toString()
+        cell.categoryName.text = item.categoryName!.rawValue
+        cell.categoryName.textColor = item.categoryName?.color()
     
     }
     
-    func configureSectionForCell(indexPath : NSIndexPath,withListItem item: ListItem) {
+    func configureSectionOfCell(indexPath : NSIndexPath,withListItem item: ListItem) {
         
         taskList[indexPath.section].removeAtIndex(indexPath.row)
         
@@ -206,6 +207,22 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         }else{
             taskList[0].append(item)
         }
+    }
+    
+    func configureDateForCell(cell: ListItemCell,
+                              withListItem item: ListItem) {
+        
+        if let completionDate = item.completionDate{
+        
+            let formatter = NSDateFormatter()
+            formatter.dateStyle = .MediumStyle
+            formatter.timeStyle = .ShortStyle
+            cell.completionDate.text = formatter.stringFromDate(completionDate)
+        }else {
+            
+            cell.completionDate.text = " "
+        }
+        
     }
     
     //MARK: TaskDetailViewControllerDelegate
@@ -243,6 +260,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         if let cell = tableView.cellForRowAtIndexPath(indexPath) as? ListItemCell {
             configureTextForCell(cell, withListItem: item)
+            configureDateForCell(cell, withListItem: item)
         }
     
         dismissViewControllerAnimated(true, completion: nil)

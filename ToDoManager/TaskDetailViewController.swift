@@ -9,12 +9,14 @@
 import UIKit
 
 
+//MARK: - TaskDetailViewControllerDelegate Protocol
+
 protocol TaskDetailViewControllerDelegate: class {
     
     //when pressed Cancel button
     func taskDetailViewControllerDidCancel(controller: TaskDetailViewController)
     
-    //when pressed Done button for Add New Task 
+    //when pressed Done button for New Task 
     func taskDetailViewController(controller: TaskDetailViewController,didFinishAddingNewTask item: ListItem)
     
     //when pressed Done button for Edit Task
@@ -23,17 +25,24 @@ protocol TaskDetailViewControllerDelegate: class {
 
 
 
-
-class TaskDetailViewController: UITableViewController , UITextFieldDelegate {
+//MARK: TaskDetailViewController Class
+class TaskDetailViewController: UITableViewController , UITextFieldDelegate,CategoryPickerViewControllerDelegate{
     
     
     weak var delegate : TaskDetailViewControllerDelegate?
     var itemToEdit : ListItem?
-
+    var categoryName : CategoryName? // Default Value
+    var completionDate = NSDate()
+    var datePickerVisible = false
+    
     // MARK: Outlets
-    @IBOutlet weak var categoryNameLabel: UILabel!
+    @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet var datePickerCell: UITableViewCell!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     @IBOutlet weak var titleTextField: UITextField!
+    @IBOutlet weak var categoryNameLabel: UILabel!
+    @IBOutlet weak var remindMeSwitch: UISwitch!
+    @IBOutlet weak var completionDateLabel: UILabel!
     
     
     // MARK: Actions
@@ -48,15 +57,22 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate {
     @IBAction func done(sender: AnyObject) {
         
         if let item = itemToEdit{
-            //edit the item object
+            //edit the task item object
             item.title = titleTextField.text!
+            item.categoryName = categoryName
+            item.shouldRemind = remindMeSwitch.on
+            item.completionDate = completionDate
+            item.scheduleNotification()
+        
             delegate?.taskDetailViewController(self, didFinishEditingNewTask: item)
             
     
         }else{
-            //initalize new item object
-            let item = ListItem()
-            item.title = titleTextField.text!
+            //initalize new task item object
+            let item = ListItem(title: titleTextField.text!)
+            item.shouldRemind = remindMeSwitch.on
+            item.completionDate = completionDate
+            item.scheduleNotification()
             titleTextField.resignFirstResponder()//close textfield before viewcontroller is dismissed
             delegate?.taskDetailViewController(self, didFinishAddingNewTask: item)
         
@@ -64,18 +80,61 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate {
 
     }
     
-    //View Controller Lifecycle
+    @IBAction func dateChanged(sender: UIDatePicker) {
+        completionDate = sender.date
+        updateCompletionDateLabel()
+    }
+    
+    @IBAction func remindMeSwitchToggled(sender: UISwitch) {
+        
+        if remindMeSwitch.on {
+            let notificationSettings = UIUserNotificationSettings(
+                forTypes: [.Alert , .Sound], categories: nil)
+            UIApplication.sharedApplication().registerUserNotificationSettings(
+                    notificationSettings)
+        }
+        
+    }
+    
+    
+    //MARK: View Controller Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         titleTextField.delegate = self
         
         if let item = itemToEdit {
             title = "Edit Task"
-            titleTextField.text = item.title
-            doneBarButton.enabled = true
             
+            //navigation bar details
+            doneBarButton.enabled = true
+            //title details
+            titleTextField.text = item.title
+            //category details
+            categoryName = item.categoryName!
+            categoryNameLabel.text = categoryName!.rawValue//default is To Do
+            categoryNameLabel.textColor = categoryName!.color()// default is blue
+            //notification details
+            remindMeSwitch.on = item.shouldRemind
+            //if completion Date of task is nil then assign it current time
+            completionDate = item.completionDate ?? NSDate()
         }
+        
+        updateCompletionDateLabel()
+        
+    }
     
+
+    //MARK: Prepare For Segue
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "ChooseCategory" {
+            let controller = segue.destinationViewController
+                as! CategoryPickerViewController
+            controller.delegate = self
+            controller.selectedCategory = categoryName
+        }
+        
     }
     
     //MARK: TextFieldDelegate Methods
@@ -102,5 +161,117 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate {
         textField.resignFirstResponder()
         return false
     }
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        hideDatePicker()
+    }
+    //MARK: TableViewControllerDelegate Methods
+    
+    override func tableView(tableView: UITableView,cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        if indexPath.section == 2 && indexPath.row == 2 {
+            return datePickerCell
+        } else {
+            return super.tableView(tableView, cellForRowAtIndexPath: indexPath)
+        }
+    }
+    
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section == 2 && datePickerVisible {
+            return 3
+        } else {
+            return super.tableView(tableView, numberOfRowsInSection: section)
+        }
+    }
+    
+    override func tableView(tableView: UITableView,heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        
+        if indexPath.section == 2 && indexPath.row == 2 {
+            return 217
+        } else {
+            return super.tableView(tableView,heightForRowAtIndexPath: indexPath)
+        }
+    }
+    
+    override func tableView(tableView: UITableView,didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        titleTextField.resignFirstResponder()// in case textField is visible
+        
+        if indexPath.section == 2 && indexPath.row == 1 {
+            if !datePickerVisible {
+                showDatePicker()
+            }else{
+                hideDatePicker()
+            }
+        }
+    }
+    
+    override func tableView(tableView: UITableView,indentationLevelForRowAtIndexPath indexPath: NSIndexPath) -> Int {
+        var indexPath = indexPath
+        if indexPath.section == 2 && indexPath.row == 2 {
+            //make date picker same intent level with the completion date row
+            indexPath = NSIndexPath(forRow: 0, inSection: indexPath.section)//
+        }
+        return super.tableView(tableView,indentationLevelForRowAtIndexPath: indexPath)
+    }
+    
+    
+    // to select only a category cell on the section 1
+    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        if indexPath.section == 1 || (indexPath.section == 2 && indexPath.row == 1){
+            return indexPath
+        }else {
+            return nil
+        }
+    }
+    
+    
+    //MARK: CategoryPickerViewControllerDelegate Methods
+    func categoryPicker(picker: CategoryPickerViewController, didPickCategory categoryName: CategoryName) {
+        
+        self.categoryName =  categoryName
+        categoryNameLabel.text = categoryName.rawValue
+        categoryNameLabel.textColor = categoryName.color()
+        
+        navigationController?.popViewControllerAnimated(true)
+        
+    }
+    
+    
+    //MARK: Convenience Methods
+    func updateCompletionDateLabel() {
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .MediumStyle
+        formatter.timeStyle = .ShortStyle
+        completionDateLabel.text = formatter.stringFromDate(completionDate)
+    }
+    
+    func showDatePicker(){
+        datePickerVisible = true
+        
+        //show date of the selected task
+        datePicker.setDate(completionDate, animated: false)
+        
+        let indexPathDatePicker = NSIndexPath(forRow: 2, inSection: 2)
+        tableView.insertRowsAtIndexPaths([indexPathDatePicker], withRowAnimation: .Fade)
+    }
+    
+    func hideDatePicker() {
+        if datePickerVisible {
+            datePickerVisible = false
+            let indexPathDateRow = NSIndexPath(forRow: 1, inSection: 2)
+            let indexPathDatePicker = NSIndexPath(forRow: 2, inSection: 2)
+            
+        tableView.beginUpdates()
+        
+        tableView.reloadRowsAtIndexPaths([indexPathDateRow],withRowAnimation: .None)
+        tableView.deleteRowsAtIndexPaths([indexPathDatePicker],withRowAnimation: .Fade)
+        
+        tableView.endUpdates()
+        
+        }
+    }
+    
+    
+    
     
 }

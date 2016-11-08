@@ -15,80 +15,121 @@ class ListItem : NSObject {
     // Properties
     var title : String = ""
     var isCompleted : Bool = false
-    
+
+    var itemID: Int = random() % 1000
+    var shouldRemind = false
     var completionDate : NSDate?
+    
     var categoryColor : UIColor?
-    var categoryName : CategoryName = CategoryName.ToDo{
-        didSet{
+    var categoryName : CategoryName?{didSet{
             
-            // set category color after category has set
-            setCategoryColor(categoryName)
-            
-        
+            //if let categoryName = categoryName{
+                // set category color after category has set
+                //setCategoryColor(categoryName)
+            //}
         }
     }
-    
-    
     
     //Initializers
+    convenience init(title : String){
+        self.init(title: title, categoryName:.ToDo)
+        
+    }
     
-    override init(){}
-    
-    init(title : String){
+    init(title : String , categoryName: CategoryName){
         
         self.title = title
-    
+        self.categoryName = categoryName
+        super.init()
     }
     
+    deinit {
+        if let notification = notificationForThisItem() {
+            print("Removing existing notification \(notification)")
+            UIApplication.sharedApplication().cancelLocalNotification(notification)
+        }
+    }
     
     //Methods
-    func setCategoryColor(category : CategoryName){
-        
-        var color : UIColor
-        switch category {
-        case CategoryName.ToDo:
-            color = UIColor.blueColor()
-        case CategoryName.ToCall:
-            color = UIColor.brownColor()
-        default:
-            color = UIColor.yellowColor()
-        }
-        categoryColor = color
-        
-    }
-    
     func toggleCompletionMark(){
         self.isCompleted = !isCompleted
     }
     
-    
-
-}
-
-
-
-// Categories
-enum CategoryName {
-    
-    case ToRemember
-    case ToBuy
-    case ToDo
-    case ToCall
-    case ToVisit
-    
-    func toString() -> String {
-        switch self {
-        case .ToRemember:
-            return "To Remember"
-        case .ToBuy:
-            return "To Buy"
-        case .ToCall:
-            return "To Call"
-        case .ToVisit:
-            return "To Visit"
-        case .ToDo:
-            return "To Do"
-        }
+    func notificationForThisItem() -> UILocalNotification? {
+        let allNotifications = UIApplication.sharedApplication().scheduledLocalNotifications!
         
+        for notification in allNotifications {
+            if let number = notification.userInfo?["ItemID"] as? Int
+                where number == itemID {
+                return notification
+            }
+        }
+        return nil
     }
+    
+    func scheduleNotification() {
+        print(NSDate())
+        if shouldRemind && completionDate!.compare(NSDate()) != .OrderedAscending {
+            //.OrderedAscending: completionDate comes not before the current date and time
+            
+            //if there is existing notification for task , cancel it
+            let existingNotification = notificationForThisItem()
+            
+            if let notification = existingNotification {
+                print("Found an existing notification : \(notification)")
+                UIApplication.sharedApplication().cancelLocalNotification(
+                    notification)
+            }
+            
+        
+            let localNotification = UILocalNotification()
+            localNotification.fireDate = completionDate
+            localNotification.timeZone = NSTimeZone.defaultTimeZone()
+            localNotification.alertBody = ("Reminder:\(title)")
+            localNotification.soundName = UILocalNotificationDefaultSoundName
+            localNotification.userInfo = ["ItemID": itemID] // correct itemID
+            
+            
+            UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+            
+            print(
+                "Scheduled notification \(localNotification) for itemID \(itemID)")
+            }
+    }
+
+    
+        
+/*
+func setCategoryColor(category : CategoryName){
+    
+    var color : UIColor
+    switch category {
+    case CategoryName.ToDo:
+        color = UIColor.blueColor()
+    case CategoryName.ToCall:
+        color = UIColor.brownColor()
+    case CategoryName.ToBuy:
+        color = UIColor.greenColor()
+    case CategoryName.ToRemember:
+        color = UIColor.orangeColor()
+    case CategoryName.ToVisit:
+        color = UIColor.redColor()
+    }
+    
+    categoryColor = color
+    }
+*/
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
