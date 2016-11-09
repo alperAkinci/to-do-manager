@@ -15,9 +15,4 @@ class ListItemCell: UITableViewCell {
     @IBOutlet weak var completionDate: UILabel!
     @IBOutlet weak var editTaskButton: UIButton!
     
-    
-    @IBAction func editTask(sender: UIButton) {
-    
-    }
-    
 }

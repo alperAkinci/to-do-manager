@@ -7,40 +7,30 @@
 //
 
 import UIKit
+import CoreData
 
 class TaskListViewController: UIViewController ,UITableViewDataSource,UITableViewDelegate , TaskDetailViewControllerDelegate{
     
     @IBOutlet weak var tableView: UITableView!
-    var uncompletedTasks = [ListItem]()
-    var completedTasks = [ListItem]()
-    var taskList = [[ListItem]]()
+    
+    
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var managedContext: NSManagedObjectContext!
+    
+    var taskListCore = [[CoreListItem]]()
+    var uncompletedTasksCore = [CoreListItem]()
+    var completedTasksCore = [CoreListItem]()
+    
+    var selectedIndexPath : NSIndexPath?
     
     //MARK: View Controller Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        taskList = [uncompletedTasks,completedTasks]
+        taskListCore = [uncompletedTasksCore,completedTasksCore]
+        fetchReminders()
         
-        
-        let row0item = ListItem(title:"A new MacBook")
-        row0item.isCompleted = false
-        row0item.categoryName = CategoryName.ToBuy
-        addList(row0item)
-        
-        let row3item = ListItem(title:"Go To SuperMarket")
-        row3item.isCompleted = false
-        row3item.categoryName = CategoryName.ToDo
-        addList(row3item)
-        
-        let row1item = ListItem(title: "Prague")
-        row1item.isCompleted = true
-        row1item.categoryName = CategoryName.ToVisit
-        addList(row1item)
-        
-        let row2item = ListItem(title: "WWDC 2016")
-        row2item.isCompleted = true
-        row2item.categoryName = CategoryName.ToRemember
-        addList(row2item)
+        print(taskListCore)
         
     }
 
@@ -51,26 +41,19 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
 
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
-        return taskList.count
+        return taskListCore.count
     
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return taskList[0].count
-        }else if section == 1{
-            return taskList[1].count
-        }else{
-            return 0
-        }
-        
+        return taskListCore[section].count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ListItem", forIndexPath: indexPath) as! ListItemCell
         
         
-        let item = taskList[indexPath.section][indexPath.row]
+        let item = taskListCore[indexPath.section][indexPath.row]
         
         configureCompletionMarkForCell(cell, withListItem: item)
         configureTextForCell(cell, withListItem: item)
@@ -83,7 +66,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         if let cell = tableView.cellForRowAtIndexPath(indexPath) {
             
-            let item = taskList[indexPath.section][indexPath.row] as ListItem
+            let item = taskListCore[indexPath.section][indexPath.row] as CoreListItem
             item.toggleCompletionMark()
             
             configureSectionOfCell(indexPath, withListItem: item)
@@ -92,6 +75,7 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         tableView.reloadData()
+        appDelegate.saveContext()
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -104,12 +88,29 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     
     func tableView(tableView: UITableView,commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
-        // remove from taskList data
-        taskList[indexPath.section].removeAtIndex(indexPath.row)
+        // remove from saved data
+        managedContext.deleteObject(taskListCore[indexPath.section][indexPath.row] as NSManagedObject)
+        
+        //cancel the local notification if there is
+        
+        let itemID = taskListCore[indexPath.section][indexPath.row].itemID as! Int
+        let listItem = ListItem(itemID: itemID)
+        
+        if let notification = listItem.notificationForThisItem() {
+            print("Removing existing notification \(notification)")
+            UIApplication.sharedApplication().cancelLocalNotification(notification)
+        }
+
+        // remove from taskList data array
+        taskListCore[indexPath.section].removeAtIndex(indexPath.row)
         
         //remove the row from tableView
         let indexPaths = [indexPath]
         tableView.deleteRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
+        
+        
+        
+        appDelegate.saveContext()
     }
     
     
@@ -118,71 +119,44 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if segue.identifier == "AddNewTask" {
-            
             let navigationController = segue.destinationViewController
                 as! UINavigationController
-            
             let controller = navigationController.topViewController
                 as! TaskDetailViewController
-            
             controller.delegate = self
         
         }else if segue.identifier == "EditTask"{
-            
             let navigationController = segue.destinationViewController
                 as! UINavigationController
             let controller = navigationController.topViewController
                 as! TaskDetailViewController
-            
             controller.delegate = self
-            
             //Get the indexPath from button placed in UITableViewCell
             if let button = sender as? UIButton{
 
                 let rootViewPoint = button.superview!.convertPoint(button.center, toView: self.tableView)
                 
                 if let indexPath = self.tableView.indexPathForRowAtPoint(rootViewPoint){
-                    controller.itemToEdit = taskList[indexPath.section][indexPath.row]
+                    selectedIndexPath = indexPath
+                    //Convert taskListCore item to listItem and send it to taskdetailVC
+                    controller.itemToEdit = convertToListItem(FromCoreListItem: taskListCore[indexPath.section][indexPath.row] )
+                    
                 }
             }
         
         }
     }
     
-    //MARK: Unwind Seque
+    //MARK: Convenience Methods
     
-    /*
-    @IBAction func saveTaskDetails(segue:UIStoryboardSegue) {
+    func configureCompletionMarkForCell(cell: UITableViewCell, withListItem item : CoreListItem) {
         
-        if let taskDetailViewController = segue.sourceViewController as? TaskDetailViewController {
-            
-            let vc = taskDetailViewController
-            let item = ListItem()
-            item.title = vc.titleTextField.text!
-            
-            // Add item to uncompleted array list , section 0
-            let newRowIndex = taskList[0].count
-            taskList[0].append(item)
-            let indexPath = NSIndexPath(forRow: newRowIndex, inSection: 0)
-            let indexPaths = [indexPath]
-            tableView.insertRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
+        guard let isCompleted = item.isCompleted as? Bool else {
+            print ("isChecked value is nil")
+            return
         }
         
-        
-        dismissViewControllerAnimated(true, completion: nil)
-    }
-    */
-    
-    
-    //MARK: Convenience Methods
-    func addList(item : ListItem){
-        (item.isCompleted) ? taskList[1].append(item) : taskList[0].append(item)
-    }
-    
-    
-    func configureCompletionMarkForCell(cell: UITableViewCell, withListItem item : ListItem) {
-        
-        if item.isCompleted {
+        if isCompleted {
             cell.accessoryType = .Checkmark
         } else {
             cell.accessoryType = .None
@@ -190,27 +164,27 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     }
     
     func configureTextForCell(cell: ListItemCell,
-                              withListItem item: ListItem) {
+                              withListItem item: CoreListItem) {
         
         cell.title.text = item.title
-        cell.categoryName.text = item.categoryName!.rawValue
-        cell.categoryName.textColor = item.categoryName?.color()
+        cell.categoryName.text = item.getCategoryName().rawValue
+        cell.categoryName.textColor = item.getCategoryName().color()
     
     }
     
-    func configureSectionOfCell(indexPath : NSIndexPath,withListItem item: ListItem) {
+    func configureSectionOfCell(indexPath : NSIndexPath,withListItem item: CoreListItem) {
         
-        taskList[indexPath.section].removeAtIndex(indexPath.row)
+        taskListCore[indexPath.section].removeAtIndex(indexPath.row)
         
-        if item.isCompleted{
-            taskList[1].append(item)
+        if item.isCompleted as! Bool{
+            taskListCore[1].append(item)
         }else{
-            taskList[0].append(item)
+            taskListCore[0].append(item)
         }
     }
     
     func configureDateForCell(cell: ListItemCell,
-                              withListItem item: ListItem) {
+                              withListItem item: CoreListItem) {
         
         if let completionDate = item.completionDate{
         
@@ -225,6 +199,77 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
         
     }
     
+    func convertToListItem(FromCoreListItem coreListItem : CoreListItem)->ListItem{
+        
+        //Title
+        let item = ListItem(title: coreListItem.title!)
+        //isComleted
+        item.isCompleted = coreListItem.isCompleted as! Bool
+        //itemID
+        item.itemID = coreListItem.itemID as! Int
+        //shouldRemind
+        item.shouldRemind = coreListItem.shouldRemind as! Bool
+        //comletionDate
+        item.completionDate = coreListItem.completionDate
+        //categoryName
+        item.categoryName = coreListItem.getCategoryName()
+    
+        return item
+    }
+    
+    func convertToCoreListItem(FromListItem listItem : ListItem)->CoreListItem{
+        
+        //1 - Access ManagedObjectContext which lives in AppDelegate, to access it you must get reference of AppDelegate first
+        let managedContext = appDelegate.managedObjectContext
+        
+        //2 - Create a new managedObject and insert it into a managed object context .
+        let entity  = NSEntityDescription.entityForName("CoreListItem", inManagedObjectContext: managedContext)
+        
+        let coreListItem = CoreListItem(entity: entity!, insertIntoManagedObjectContext: managedContext)
+        //3 - With an NSManagedObject , set the attributes 
+        coreListItem.title = listItem.title
+        coreListItem.isCompleted = listItem.isCompleted
+        coreListItem.itemID = listItem.itemID
+        coreListItem.shouldRemind = listItem.shouldRemind
+        coreListItem.completionDate = listItem.completionDate
+        coreListItem.categoryName = listItem.categoryName?.rawValue
+        //4 - Commit the changes and save to disk by calling save on the managed object context
+        do {
+            try managedContext.save()
+        }catch let error as NSError{
+            print("Could not save \(error),\(error.userInfo)")
+        }
+        
+        return coreListItem
+        
+        
+    }
+    
+    func fetchReminders () {
+        //1 - before we do anything in CoreData , we need a managed object context . Pull up AppDelegate and grab a referance to its managed object context.
+        let managedContext = appDelegate.managedObjectContext
+        
+        //2 - Make Fetching request via NSFetchRequest
+        let fetchRequest = NSFetchRequest(entityName: "CoreListItem")
+        
+        //3 - Return an array of managed context that specified by fetch request
+        do {
+            let results = try managedContext.executeFetchRequest(fetchRequest)
+            let coreListArray = results as! [CoreListItem]
+            
+            for item in coreListArray {
+                if let isCompleted = item.isCompleted as? Bool{
+                    isCompleted ? taskListCore[1].append(item) : taskListCore[0].append(item)
+                }
+            }
+            
+        }catch let error as NSError{
+            print("Could not fetch \(error),\(error.userInfo)")
+        }
+        
+    }
+    
+        
     //MARK: TaskDetailViewControllerDelegate
     
     func taskDetailViewControllerDidCancel(controller: TaskDetailViewController) {
@@ -233,12 +278,16 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     }
     
     
-    
     func taskDetailViewController(controller: TaskDetailViewController, didFinishAddingNewTask item: ListItem) {
         
-        //Add new row to uncompleted section of list , section 0 
-        let newRowIndex = taskList[0].count
-        taskList[0].append(item)
+        //convert ListItem to CoreListItem, //save data
+        let coreListItem = convertToCoreListItem(FromListItem: item)
+        
+        //Add new row to uncompleted section of list , section 0
+        let newRowIndex = taskListCore[0].count
+        taskListCore[0].append(coreListItem)
+        
+        
         let indexPath = NSIndexPath(forRow: newRowIndex, inSection: 0)
         let indexPaths = [indexPath]
         tableView.insertRowsAtIndexPaths(indexPaths,withRowAnimation: .Automatic)
@@ -248,27 +297,23 @@ class TaskListViewController: UIViewController ,UITableViewDataSource,UITableVie
     
     func taskDetailViewController(controller: TaskDetailViewController,didFinishEditingNewTask item: ListItem){
         
-        //Update the row of edited cell
-        var indexPath = NSIndexPath()
+        let coreListItem = convertToCoreListItem(FromListItem: item)
         var section : Int
-        item.isCompleted ? (section = 1) : (section = 0)
+        coreListItem.isCompleted as! Bool ? (section = 1) : (section = 0)
         
-        if let index = taskList[section].indexOf(item) {
-            
-            indexPath = NSIndexPath(forRow: index, inSection: section)
-        }
+        //delete the item before edit
+        managedContext.deleteObject(taskListCore[selectedIndexPath!.section][selectedIndexPath!.row] as NSManagedObject)
         
-        if let cell = tableView.cellForRowAtIndexPath(indexPath) as? ListItemCell {
-            configureTextForCell(cell, withListItem: item)
-            configureDateForCell(cell, withListItem: item)
-        }
-    
+        //add edited item to task array
+        taskListCore[section][selectedIndexPath!.row] = coreListItem
+        
+        //reload tableView
+        tableView.reloadRowsAtIndexPaths([selectedIndexPath!], withRowAnimation: .Automatic)
+       
+        appDelegate.saveContext()
         dismissViewControllerAnimated(true, completion: nil)
+        
     }
-
-    
-    
-    
     
 }
 

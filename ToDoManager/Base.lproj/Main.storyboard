@@ -40,7 +40,6 @@
                                                         </mask>
                                                     </variation>
                                                     <connections>
-                                                        <action selector="editTask:" destination="RaP-gI-WMg" eventType="touchUpInside" id="LF0-Ri-vSJ"/>
                                                         <segue destination="sXF-Et-uMi" kind="presentation" identifier="EditTask" id="aPT-d5-PaK"/>
                                                     </connections>
                                                 </button>
@@ -145,7 +144,7 @@
                     <navigationItem key="navigationItem" title="Task List" id="oKg-bG-ZpI">
                         <barButtonItem key="leftBarButtonItem" image="nav_bar_ic_settings" id="ddd-fm-BPs">
                             <connections>
-                                <segue destination="AIJ-zM-mLV" kind="show" id="BaR-42-G6h"/>
+                                <segue destination="AIJ-zM-mLV" kind="show" identifier="Settings" id="BaR-42-G6h"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="nav_bar_ic_add" id="Kuw-co-Rwk">

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4E1E8E5F1DD0759E00FE54ED /* CategoryPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E5E1DD0759E00FE54ED /* CategoryPickerViewController.swift */; };
 		4E1E8E611DD1F02900FE54ED /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E601DD1F02900FE54ED /* SettingsViewController.swift */; };
+		4E1E8E731DD25E4500FE54ED /* CoreListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E721DD25E4500FE54ED /* CoreListItem.swift */; };
+		4E1E8E751DD25E4D00FE54ED /* CoreListItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8E741DD25E4D00FE54ED /* CoreListItem+CoreDataProperties.swift */; };
 		4E4BEAC11DCCE4A200B4E4E2 /* ListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */; };
 		4E4BEAC91DCE199C00B4E4E2 /* ListItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEAC81DCE199C00B4E4E2 /* ListItemCell.swift */; };
 		4E4BEACF1DCF526C00B4E4E2 /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4BEACE1DCF526C00B4E4E2 /* TaskDetailViewController.swift */; };
@@ -23,6 +25,8 @@
 /* Begin PBXFileReference section */
 		4E1E8E5E1DD0759E00FE54ED /* CategoryPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryPickerViewController.swift; sourceTree = "<group>"; };
 		4E1E8E601DD1F02900FE54ED /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		4E1E8E721DD25E4500FE54ED /* CoreListItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreListItem.swift; sourceTree = "<group>"; };
+		4E1E8E741DD25E4D00FE54ED /* CoreListItem+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreListItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListItem.swift; sourceTree = "<group>"; };
 		4E4BEAC81DCE199C00B4E4E2 /* ListItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListItemCell.swift; sourceTree = "<group>"; };
 		4E4BEACE1DCF526C00B4E4E2 /* TaskDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -47,13 +51,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4E4BEACA1DCF514000B4E4E2 /* Modal */ = {
+		4E1E8E761DD288BB00FE54ED /* View */ = {
 			isa = PBXGroup;
 			children = (
-				4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */,
 				4E4BEAC81DCE199C00B4E4E2 /* ListItemCell.swift */,
 			);
-			name = Modal;
+			name = View;
+			sourceTree = "<group>";
+		};
+		4E4BEACA1DCF514000B4E4E2 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				4E1E8E741DD25E4D00FE54ED /* CoreListItem+CoreDataProperties.swift */,
+				4E1E8E721DD25E4500FE54ED /* CoreListItem.swift */,
+				4E4BEAC01DCCE4A200B4E4E2 /* ListItem.swift */,
+			);
+			name = Model;
 			sourceTree = "<group>";
 		};
 		4E4BEACD1DCF51EF00B4E4E2 /* Controller */ = {
@@ -87,8 +100,9 @@
 			isa = PBXGroup;
 			children = (
 				4EACD1F91DCC8A6C003D1E12 /* AppDelegate.swift */,
+				4E4BEACA1DCF514000B4E4E2 /* Model */,
+				4E1E8E761DD288BB00FE54ED /* View */,
 				4E4BEACD1DCF51EF00B4E4E2 /* Controller */,
-				4E4BEACA1DCF514000B4E4E2 /* Modal */,
 				4EACD1FD1DCC8A6C003D1E12 /* Main.storyboard */,
 				4EACD2051DCC8A6D003D1E12 /* LaunchScreen.storyboard */,
 				4EACD2141DCC92B1003D1E12 /* Assets.xcassets */,
@@ -175,6 +189,8 @@
 				4EACD2021DCC8A6C003D1E12 /* ToDoManager.xcdatamodeld in Sources */,
 				4E4BEACF1DCF526C00B4E4E2 /* TaskDetailViewController.swift in Sources */,
 				4E1E8E5F1DD0759E00FE54ED /* CategoryPickerViewController.swift in Sources */,
+				4E1E8E751DD25E4D00FE54ED /* CoreListItem+CoreDataProperties.swift in Sources */,
+				4E1E8E731DD25E4500FE54ED /* CoreListItem.swift in Sources */,
 				4E4BEAC91DCE199C00B4E4E2 /* ListItemCell.swift in Sources */,
 				4E1E8E611DD1F02900FE54ED /* SettingsViewController.swift in Sources */,
 			);

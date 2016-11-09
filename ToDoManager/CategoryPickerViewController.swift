@@ -25,15 +25,15 @@ enum CategoryName : String{
         var color : UIColor
         switch self{
         case CategoryName.ToDo:
-            color = UIColor.blueColor()
+            color = UIColor.redColor()
         case CategoryName.ToCall:
-            color = UIColor.brownColor()
+            color = UIColor.blueColor()
         case CategoryName.ToBuy:
             color = UIColor.greenColor()
         case CategoryName.ToRemember:
             color = UIColor.orangeColor()
         case CategoryName.ToVisit:
-            color = UIColor.redColor()
+            color = UIColor.purpleColor()
         }
         
         return color

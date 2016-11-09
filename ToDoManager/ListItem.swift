@@ -16,21 +16,15 @@ class ListItem : NSObject {
     var title : String = ""
     var isCompleted : Bool = false
 
-    var itemID: Int = random() % 1000
+    var itemID: Int = random() % 1000000
     var shouldRemind = false
     var completionDate : NSDate?
     
     var categoryColor : UIColor?
-    var categoryName : CategoryName?{didSet{
-            
-            //if let categoryName = categoryName{
-                // set category color after category has set
-                //setCategoryColor(categoryName)
-            //}
-        }
-    }
+    var categoryName : CategoryName?  
     
     //Initializers
+    
     convenience init(title : String){
         self.init(title: title, categoryName:.ToDo)
         
@@ -43,12 +37,20 @@ class ListItem : NSObject {
         super.init()
     }
     
+    init(itemID: Int){
+        self.itemID = itemID
+        super.init()
+    }
+    
+    /*
     deinit {
         if let notification = notificationForThisItem() {
             print("Removing existing notification \(notification)")
             UIApplication.sharedApplication().cancelLocalNotification(notification)
         }
     }
+    */
+    
     
     //Methods
     func toggleCompletionMark(){
@@ -95,10 +97,7 @@ class ListItem : NSObject {
             print(
                 "Scheduled notification \(localNotification) for itemID \(itemID)")
             }
-    }
-
-    
-        
+    }        
 /*
 func setCategoryColor(category : CategoryName){
     

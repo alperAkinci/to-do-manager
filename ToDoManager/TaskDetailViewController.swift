@@ -31,7 +31,7 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate,Cate
     
     weak var delegate : TaskDetailViewControllerDelegate?
     var itemToEdit : ListItem?
-    var categoryName : CategoryName? // Default Value
+    var categoryName : CategoryName = .ToDo // Default Value
     var completionDate = NSDate()
     var datePickerVisible = false
     
@@ -70,6 +70,7 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate,Cate
         }else{
             //initalize new task item object
             let item = ListItem(title: titleTextField.text!)
+            item.categoryName = categoryName
             item.shouldRemind = remindMeSwitch.on
             item.completionDate = completionDate
             item.scheduleNotification()
@@ -111,12 +112,13 @@ class TaskDetailViewController: UITableViewController , UITextFieldDelegate,Cate
             titleTextField.text = item.title
             //category details
             categoryName = item.categoryName!
-            categoryNameLabel.text = categoryName!.rawValue//default is To Do
-            categoryNameLabel.textColor = categoryName!.color()// default is blue
+            categoryNameLabel.text = categoryName.rawValue//default is To Do
+            categoryNameLabel.textColor = categoryName.color()// default is blue
             //notification details
             remindMeSwitch.on = item.shouldRemind
             //if completion Date of task is nil then assign it current time
             completionDate = item.completionDate ?? NSDate()
+            
         }
         
         updateCompletionDateLabel()
